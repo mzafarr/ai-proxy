@@ -3,7 +3,7 @@
 Minimal production-safe Fastify + Postgres backend for KlarityAI keyboard and future apps.
 
 ## Stack
-- Fastify (Node 20)
+- Fastify (Node API runtime via Bun)
 - Postgres 15
 - AI SDK (`ai` + `@ai-sdk/openai`)
 - JWT session auth (15 min)
@@ -27,22 +27,22 @@ Use `.env.example`:
 
 ## Local run
 ```bash
-npm install
-npm run build
-npm run dev
+bun install
+bun run build
+bun run dev
 ```
 
 ## Schema
 The repo ships the SQL in `sql/schema.sql`. To reuse the `.env` file you already created, run:
 
 ```bash
-npm run init-db
+bun run init-db
 ```
 
-That script uses `dotenv` to load `.env` and executes `psql "$DATABASE_URL" -f sql/schema.sql`. It only logs status and errors so secrets stay local. If `psql` remains missing, either reload your shell (`source ~/.zshrc`), set `PSQL_PATH=/opt/homebrew/opt/libpq/bin/psql npm run init-db`, or run the SQL directly inside your hosted Postgres (Coolify, Cloud SQL, etc.).
+That script uses `dotenv` to load `.env` and executes `psql "$DATABASE_URL" -f sql/schema.sql`. It only logs status and errors so secrets stay local. If `psql` remains missing, either reload your shell (`source ~/.zshrc`), set `PSQL_PATH=/opt/homebrew/opt/libpq/bin/psql bun run init-db`, or run the SQL directly inside your hosted Postgres (Coolify, Cloud SQL, etc.).
 
 ### Platform notes
-- **macOS**: install `psql` via `brew install libpq` and `export PATH="/opt/homebrew/opt/libpq/bin:$PATH"` before running `npm run init-db`.
+- **macOS**: install `psql` via `brew install libpq` and `export PATH="/opt/homebrew/opt/libpq/bin:$PATH"` before running `bun run init-db`.
 - **Linux**: use your distro package manager (`apt install postgresql-client` on Debian/Ubuntu, `dnf install postgresql` on Fedora/RHEL, etc.).
 - **Windows**: install the [PostgreSQL client tools](https://www.postgresql.org/download/windows/) and make sure `psql` is on `%PATH%`.
 - **Alternative**: apply `sql/schema.sql` inside your hosted Postgres (Coolify, Cloud SQL, etc.)—export the file and run `psql` from that platform instead of locally.
