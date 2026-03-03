@@ -1,6 +1,7 @@
-import { spawn } from 'node:child_process';
 import path from 'node:path';
+import { readFile } from 'node:fs/promises';
 import dotenv from 'dotenv';
+import { Pool } from 'pg';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
@@ -11,22 +12,19 @@ if (!databaseUrl) {
 }
 
 const schemaPath = path.resolve(process.cwd(), 'sql', 'schema.sql');
+const run = async (): Promise<void> => {
+  const sql = await readFile(schemaPath, 'utf8');
+  const pool = new Pool({ connectionString: databaseUrl });
 
-const psqlCommand = process.env.PSQL_PATH ?? 'psql';
-const runner = spawn(psqlCommand, [databaseUrl, '-f', schemaPath], {
-  stdio: 'inherit'
-});
-
-runner.on('exit', (code) => {
-  if (code === 0) {
+  try {
+    await pool.query(sql);
     console.log('Database schema applied successfully.');
-    return;
+  } finally {
+    await pool.end();
   }
-  console.error(`psql exited with code ${code}`);
-  process.exit(code ?? 1);
-});
+};
 
-runner.on('error', (error) => {
-  console.error('Failed to run psql:', error.message);
+run().catch((error) => {
+  console.error('Failed to apply schema:', error instanceof Error ? error.message : error);
   process.exit(1);
 });
