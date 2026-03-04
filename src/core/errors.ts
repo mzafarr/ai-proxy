@@ -1,7 +1,9 @@
 export type ErrorCode =
   | 'TOKEN_INVALID'
   | 'TOKEN_EXPIRED'
+  | 'APP_KEY_INVALID'
   | 'INPUT_TOO_LONG'
+  | 'RATE_LIMITED'
   | 'DAILY_CAP_REACHED'
   | 'PROVIDER_TIMEOUT'
   | 'INTERNAL_ERROR'

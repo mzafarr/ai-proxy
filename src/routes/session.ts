@@ -3,6 +3,7 @@ import { issueAccessToken } from '../core/auth.js';
 import { ApiError } from '../core/errors.js';
 import { pool } from '../db/postgres.js';
 import type { Tier } from '../core/config.js';
+import { enforceAppKey, enforceBootstrapRateLimit } from '../core/security.js';
 
 type BootstrapBody = {
   app_id: string;
@@ -11,6 +12,15 @@ type BootstrapBody = {
 
 const sessionRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.post<{ Body: BootstrapBody }>('/session/bootstrap', async (request, reply) => {
+    enforceAppKey(request.headers['x-app-key']);
+    const rateLimitResult = enforceBootstrapRateLimit(request.ip);
+    if (!rateLimitResult.allowed) {
+      reply.header('Retry-After', String(rateLimitResult.retryAfterSec));
+      throw new ApiError(429, 'RATE_LIMITED', 'Too many bootstrap requests. Try again later.', {
+        retry_after_seconds: rateLimitResult.retryAfterSec
+      });
+    }
+
     const { app_id: appId, installation_id: installationId } = request.body ?? {};
 
     if (!appId || !installationId) {

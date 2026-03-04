@@ -6,7 +6,8 @@ import { ApiError } from './core/errors.js';
 import { pool } from './db/postgres.js';
 
 const app = Fastify({
-  logger: true
+  logger: true,
+  trustProxy: true
 });
 
 await app.register(sessionRoutes);

@@ -5,6 +5,7 @@ import { getFeatureConfig } from '../core/featureRegistry.js';
 import { runLlm } from '../core/llm.js';
 import { ApiError } from '../core/errors.js';
 import { consumeDailyQuota, ensureUsageRow } from '../core/quota.js';
+import { enforceAppKey } from '../core/security.js';
 
 type ExecuteBody = {
   app_id: string;
@@ -17,6 +18,7 @@ type ExecuteBody = {
 const executeRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.post<{ Body: ExecuteBody }>('/ai/execute', async (request, reply) => {
     const startedAt = Date.now();
+    enforceAppKey(request.headers['x-app-key']);
     const claims = verifyAccessToken(request.headers.authorization);
 
     const {
